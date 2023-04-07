@@ -1,0 +1,80 @@
+
+#数据库连接配置
+spring:
+  datasource:
+    #用户名
+    username: root
+    #密码
+    password: 123456
+    # url需要指定时区serverTimezone为 GMT%2B8 ：北京时间东八区
+    url: jdbc:mysql://localhost:3306/finance?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8&useSSL=true
+    # 新版的驱动类改成了com.mysql.cj.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    #配置druid数据库连接池时type这项必选
+    type: com.alibaba.druid.pool.DruidDataSource
+    #下面属性可选
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20 # 配置连接池初始化大小、最小、最大
+      max-wait: 60000 # 配置获取连接等待超时的时间
+      time-between-eviction-runs-millis: 60000 # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+      min-evictable-idle-time-millis: 300000 # 配置一个连接在池中最小生存的时间，单位是毫秒
+      # mssql中为 select 1
+      # mysql中为 select 'x'
+      # oracle中为 select 1 from dual
+      validation-query: SELECT 'x' # 用来检测连接是否有效的sql
+      test-while-idle: true # 建议配置为true，不影响性能，并且保证安全性。申请连接的时候检测，如果空闲时间大于timeBetweenEvictionRunsMillis，执行validationQuery检测连接是否有效。
+      test-on-borrow: false # 申请连接时执行validationQuery检测连接是否有效
+      test-on-return: false # 归还连接时执行validationQuery检测连接是否有效
+      pool-prepared-statements: true # 是否缓存preparedStatement,对支持游标的数据库性能提升巨大 mysql5.5+
+      max-pool-prepared-statement-per-connection-size: 20
+      filters: stat,wall # 配置监控统计拦截和防御sql注入的filters
+      use-global-data-source-stat: true # 使用全局数据源统计
+      connect-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000 # 连接属性 打开mergeSql(合并SQL)功能；慢SQL记录
+      #设置访问druid监控页的账号和密码,默认没有。http://localhost:8080/druid/index.html
+      stat-view-servlet:
+        login-username: root
+        login-password: root
+        enabled: true
+      #开启web filter
+      web-stat-filter:
+        enabled: true
+
+  #配置thymeleaf渲染视图
+  thymeleaf:
+    prefix: classpath:/templates/views/
+    suffix: .html
+    cache: false  # 关闭缓存
+  main:
+    allow-circular-references: true # 解决循环依赖问题
+  devtools:
+    restart:
+      enabled: true
+
+
+# 分页配置
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+  params: count=countSql
+
+#  使用mybatis配置文件时需要指明
+mybatis:
+#  config-location: classpath:mybatis/mybatis-config.xml
+# 指定sql映射文件位置
+ mapper-locations: classpath:com/bjpowernode/finance/mapper/*.xml
+
+# spring boot集成mybatis的方式打印sql语句
+# 开启mybatis日志
+ configuration:
+   log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+server:
+  #端口设置
+  port: 8080
+  servlet:
+    session:
+      #session超时时间设置：2小时 7200秒
+      timeout: PT2H
